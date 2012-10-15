@@ -210,6 +210,7 @@ public class TeiidAdHocScriptRunnable extends SimpleSQLResultRunnable {
         }
         finally
         {
+            _endTime = new Date().getTime();	
             resultsViewAPI.saveElapseTime(_operationCommand, _endTime - _startTime);
             //save the results and parameters.
             resultsViewAPI.saveDetailResults(_operationCommand);
