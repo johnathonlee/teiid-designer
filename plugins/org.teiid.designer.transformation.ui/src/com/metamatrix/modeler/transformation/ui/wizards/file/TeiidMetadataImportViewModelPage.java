@@ -367,8 +367,6 @@ public class TeiidMetadataImportViewModelPage extends AbstractWizardPage
 			this.fileInfo.setViewTableName(StringUtilities.EMPTY_STRING);
 		}
 
-		synchronizeUI();
-
 		validatePage();
 	}
 
