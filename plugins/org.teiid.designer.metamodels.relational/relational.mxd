@@ -15,5 +15,10 @@
             <p:display locale="en_US">Deterministic</p:display>
         </p:property>
     </p:extendedMetaclass>
+	<p:extendedMetaclass name="com.metamatrix.metamodels.relational.impl.BaseTableImpl">
+		<p:property advanced="false" index="true" masked="false" name="native-query" required="false" type="string">
+			<p:display locale="en">Native Query</p:display>
+		</p:property>
+	</p:extendedMetaclass>
 
 </p:modelExtension>
