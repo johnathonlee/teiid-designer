@@ -14,6 +14,9 @@
             <p:description locale="en_US">Specifies that the source function will always returns the same result for a specific input value</p:description>
             <p:display locale="en_US">Deterministic</p:display>
         </p:property>
+        <p:property advanced="false" defaultValue="false" index="true" masked="false" name="non-prepared" required="false" type="boolean">
+            <p:display locale="en">Non-Prepared</p:display>
+        </p:property>
     </p:extendedMetaclass>
 	<p:extendedMetaclass name="com.metamatrix.metamodels.relational.impl.BaseTableImpl">
 		<p:property advanced="false" index="true" masked="false" name="native-query" required="false" type="string">
