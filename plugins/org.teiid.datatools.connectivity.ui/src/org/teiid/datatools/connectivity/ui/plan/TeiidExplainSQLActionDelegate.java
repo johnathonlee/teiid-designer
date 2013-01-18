@@ -1,10 +1,10 @@
 /*
- * JBoss, Home of Professional Open Source.
- *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
- *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
- */
+* JBoss, Home of Professional Open Source.
+*
+* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+*
+* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+*/
 package org.teiid.datatools.connectivity.ui.plan;
 
 import java.sql.Connection;
@@ -44,8 +44,8 @@ import org.teiid.datatools.connectivity.ui.Activator;
 import org.teiid.datatools.connectivity.ui.Messages;
 import org.teiid.datatools.views.ExecutionPlanView;
 
-public class TeiidExplainSQLActionDelegate extends BaseExplainAction implements
-IEditorActionDelegate, ISelectionChangedListener, IUpdate {
+public class TeiidExplainSQLActionDelegate extends BaseExplainAction
+    implements IEditorActionDelegate, ISelectionChangedListener, IUpdate {
 
     protected SQLEditor _sqlEditor;
 
@@ -58,16 +58,16 @@ IEditorActionDelegate, ISelectionChangedListener, IUpdate {
         setActionDefinitionId(ISQLEditorActionConstants.EXPLAIN_SQL_ACTION_ID);
     }
 
-    public void setActiveEditor( SQLEditor targetEditor ) {
+    public void setActiveEditor(SQLEditor targetEditor) {
         _sqlEditor = targetEditor;
         targetEditor.getSelectionProvider().addSelectionChangedListener(this);
         update();
     }
 
+    @Override
     public void update() {
         String sql = getSQLStatements();
-        setEnabled(_sqlEditor != null && (_sqlEditor.isConnected()) && super.canBeEnabled()
-                && (sql != null && sql.length() > 0));
+        setEnabled(_sqlEditor != null && (_sqlEditor.isConnected()) && super.canBeEnabled() && (sql != null && sql.length() > 0));
     }
 
     @Override
@@ -105,11 +105,12 @@ IEditorActionDelegate, ISelectionChangedListener, IUpdate {
     }
 
     /**
-     * Sets the focus to the editor after the execution plan is shown
-     */
+    * Sets the focus to the editor after the execution plan is shown
+    */
     @Override
     public Runnable getPostRun() {
         Runnable postRun = new Runnable() {
+            @Override
             public void run() {
                 _sqlEditor.getEditorSite().getPage().activate(_sqlEditor);
             }
@@ -118,8 +119,8 @@ IEditorActionDelegate, ISelectionChangedListener, IUpdate {
     }
 
     /**
-     * Returns the variable declarations in the SQL Editor
-     */
+    * Returns the variable declarations in the SQL Editor
+    */
     @Override
     protected HashMap getVariableDeclarations() {
         ITextSelection _selection = (ITextSelection)_sqlEditor.getSelectionProvider().getSelection();
@@ -152,21 +153,24 @@ IEditorActionDelegate, ISelectionChangedListener, IUpdate {
     }
 
     /**
-     * Updates the action when selection changes
-     * 
-     * @param event
-     */
-    public void selectionChanged( SelectionChangedEvent event ) {
+    * Updates the action when selection changes
+    *
+    * @param event
+    */
+    @Override
+    public void selectionChanged(SelectionChangedEvent event) {
         if (event.getSelection() instanceof ITextSelection) {
             update();
         }
     }
 
-    public void setActiveEditor( IAction action,
-                                 IEditorPart targetEditor ) {
+    @Override
+    public void setActiveEditor(IAction action,
+                                IEditorPart targetEditor) {
         setActiveEditor((SQLEditor)targetEditor);
     }
 
+    @Override
     public void run() {
         if (!isEnabled()) {
             return;
@@ -224,28 +228,32 @@ IEditorActionDelegate, ISelectionChangedListener, IUpdate {
         }
     }
 
-    private String getExecutionPlan( Connection sqlConnection,
-                                     String sql ) throws SQLException {
+    private String getExecutionPlan(Connection sqlConnection,
+                                    String sql) throws SQLException {
         String executionPlan = null;
 
         if (sql == null || sql.length() == 0) {
-            throw new SQLException("An SQL statement is required to retrieve the execution plan");
+            throw new SQLException("An SQL statement is required to retrieve the execution plan"); //$NON-NLS-1$
         }
 
         Statement stmt = sqlConnection.createStatement();
+        stmt.execute("SET NOEXEC ON"); //$NON-NLS-1$
         stmt.execute("SET SHOWPLAN DEBUG"); //$NON-NLS-1$
         stmt.executeQuery(sql);
         ResultSet planRs = stmt.executeQuery("SHOW PLAN"); //$NON-NLS-1$
         planRs.next();
         executionPlan = planRs.getString("PLAN_XML"); //$NON-NLS-1$
+        stmt.execute("SET NOEXEC OFF"); //$NON-NLS-1$
         return executionPlan;
     }
 
-    public void run( IAction action ) {
+    @Override
+    public void run(IAction action) {
     }
 
-    public void selectionChanged( IAction action,
-                                  ISelection selection ) {
+    @Override
+    public void selectionChanged(IAction action,
+                                 ISelection selection) {
         if (selection instanceof ITextSelection) {
             update();
         }
