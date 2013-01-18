@@ -2,3 +2,9 @@ target
 .settings
 bin
 tmp
+plugins/org.teiid.designer.legacy/System.vdb
+plugins/teiid_embedded_query/System.vdb
+tests/org.teiid.designer.transformation.test/testdata/COLUMNS.INDEX
+tests/org.teiid.designer.transformation.test/testdata/TABLES.INDEX
+.gitignore
+

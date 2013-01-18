@@ -10,6 +10,8 @@ package com.metamatrix.modeler.transformation.ui.wizards.file;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.StringTokenizer;
@@ -157,6 +159,8 @@ public class TeiidMetadataFileInfo extends TeiidFileInfo implements UiConstants 
 	
 	private boolean ignoreReload = false;
 
+        private String charset = "UTF-8";
+
 	/**
 	 * 
 	 * @param dataFile the Teiid-formatted data file
@@ -167,7 +171,23 @@ public class TeiidMetadataFileInfo extends TeiidFileInfo implements UiConstants 
 
 		initialize();
 	}
-	
+
+       /**
+        * 
+        * @param dataFile the Teiid-formatted data file
+        * @param charset charset
+        */
+       public TeiidMetadataFileInfo(File dataFile, String charset) {
+               super(dataFile, true);
+               CoreArgCheck.isNotNull(dataFile, "dataFile is null"); //$NON-NLS-1$
+
+               if(charset != null || charset.length() != 0) {
+                       this.charset = charset;
+               }
+
+               initialize();
+       }
+
 	/**
 	 * 
 	 * @param info the data file info object
@@ -357,13 +377,15 @@ public class TeiidMetadataFileInfo extends TeiidFileInfo implements UiConstants 
 		Collection<String> lines = new ArrayList<String>(7);
 		
         if(getDataFile() != null && getDataFile().exists()){
-            FileReader fr=null;
+            FileInputStream stream = null;
+            InputStreamReader reader = null;
             BufferedReader in=null;
 
             try{
             	int iLines = 0;
-                fr=new FileReader(getDataFile());
-                in = new BufferedReader(fr);
+                stream = new FileInputStream(getDataFile());
+                reader = new InputStreamReader(stream, this.charset);
+                in = new BufferedReader(reader);                
                 String str;
                 while ((str = in.readLine()) != null) {
                 	iLines++;
@@ -381,7 +403,10 @@ public class TeiidMetadataFileInfo extends TeiidFileInfo implements UiConstants 
             }
             finally{
                 try{
-                    fr.close();
+                    stream.close();
+                }catch(java.io.IOException e){}
+                try{
+                    reader.close();
                 }catch(java.io.IOException e){}
                 try{
                     in.close();
@@ -930,5 +955,9 @@ public class TeiidMetadataFileInfo extends TeiidFileInfo implements UiConstants 
     	
     	return finalSQLString;
     	
+    }
+
+    public String getCharset() {
+       return this.charset;
     }
 }

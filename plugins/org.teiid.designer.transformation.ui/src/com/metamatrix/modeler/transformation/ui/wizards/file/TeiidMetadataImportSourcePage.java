@@ -128,6 +128,7 @@ public class TeiidMetadataImportSourcePage extends AbstractWizardPage implements
 	private static final String INCLCOLUMNNAME = "INCLCOLUMNNAME"; //$NON-NLS-1$
 	private static final String VALUE_YES = "YES"; //$NON-NLS-1$
 	private static final String VALUE_COMMA = "COMMA"; //$NON-NLS-1$
+        private static final String CHARSET = "CHARSET"; //$NON-NLS-1$
 	
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 	private static final String DOT_XML = ".XML"; //$NON-NLS-1$
@@ -499,6 +500,10 @@ public class TeiidMetadataImportSourcePage extends AbstractWizardPage implements
 						this.dataFileFolderText.setText(location);
 						this.dataFileFolderText.setToolTipText(home);
 					}
+                                        String charset = (String) props.get(CHARSET);
+                                        if (charset != null) {
+                                                this.profileInfo.charset = charset;
+                                        }
 					clearFileListViewer();
 					loadFileListViewer();
 					
@@ -559,9 +564,9 @@ public class TeiidMetadataImportSourcePage extends AbstractWizardPage implements
 						if (data != null && data instanceof File) {
 							File theFile = (File) data;
 							if (!theFile.isDirectory()) {
-								if (this.info.getFileInfo(theFile) == null) {
-									TeiidMetadataFileInfo fileInfo = new TeiidMetadataFileInfo(theFile);
-									this.info.addFileInfo(fileInfo);
+                                                                TeiidMetadataFileInfo fileInfo = this.info.getFileInfo(theFile);
+                                                                if (fileInfo == null || !fileInfo.getCharset().equals(this.profileInfo.charset)) {
+								    this.info.addFileInfo(new TeiidMetadataFileInfo(theFile, this.profileInfo.charset));
 								}
 								this.info.validate();
 							}
@@ -1183,6 +1188,7 @@ public class TeiidMetadataImportSourcePage extends AbstractWizardPage implements
     	public boolean columnsInFirstLine = false;
     	public String home;
     	public String delimiterType = VALUE_COMMA;
+        public String charset="UTF-8";
     }
 
 	public class CPListener implements IProfileListener {
