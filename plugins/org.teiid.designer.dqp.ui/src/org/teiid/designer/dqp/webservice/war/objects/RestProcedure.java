@@ -7,6 +7,8 @@
  */
 package org.teiid.designer.dqp.webservice.war.objects;
 
+import java.util.LinkedList;
+
 /**
  * Domain class that defines a procedure to be exposed RESTFully. This class is used to generate the REST resource class in the
  * generated REST war.
@@ -20,6 +22,7 @@ public class RestProcedure {
     private String producesAnnotation;
     private String uri;
     private String modelName;
+    private LinkedList<String> queryParameterList; 
 
     /**
      * @return consumesAnnotation
@@ -118,5 +121,19 @@ public class RestProcedure {
     public void setUri( String uri ) {
         this.uri = uri;
     }
+
+	/**
+	 * @return the queryParameterList
+	 */
+	public LinkedList<String> getQueryParameterList() {
+		return queryParameterList;
+	}
+
+	/**
+	 * @param queryParameterList the queryParameterList to set
+	 */
+	public void setQueryParameterList(LinkedList<String> queryParameterList) {
+		this.queryParameterList = queryParameterList;
+	}
 
 }

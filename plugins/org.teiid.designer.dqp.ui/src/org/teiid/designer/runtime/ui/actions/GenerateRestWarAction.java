@@ -13,6 +13,7 @@ import static org.teiid.designer.runtime.extension.rest.RestModelExtensionConsta
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -338,6 +339,7 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
                                                 String fullName,
                                                 List restfulProcedureArray ) {
         String restMethod = getRestMethod(procedure);
+        LinkedList<String> queryParameterList = new LinkedList<String>(); 
 
         if (restMethod != null) {
             String uri = getUri(procedure);
@@ -361,6 +363,7 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
 
                 }
 
+                //Check for query parameters
                 String uriString = uri;
                 for (int i = 0; i < uriString.length(); i++) {
                     String character = uriString.substring(i, i + 1);
@@ -368,10 +371,26 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
                         uriParameterCount++;
                     }
                 }
+                
+                //Check for query parameters
+                if (uriString.indexOf("&")>-1){ //$NON-NLS-1$
+                  String[] queryParameterArray = uriString.split("&"); //$NON-NLS-1$
+                  int i = 0;
+                  for (String param : queryParameterArray) {
+                    i++;
+                    if (i==1) {
+                      uri= param; //Set the first token as our URI and continue
+                        continue; 
+                    }
+                      queryParameterList.addLast(param);
+                  }
+                }
+                              
                 restProcedure.setRestMethod(restMethod);
                 restProcedure.setUri(uri);
                 restProcedure.setProcedureName(name);
                 restProcedure.setFullyQualifiedProcedureName(fullName);
+                restProcedure.setQueryParameterList(queryParameterList); 
 
                 // Create JSON version
                 RestProcedure jsonRestProcedure = new RestProcedure();
@@ -380,13 +399,15 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
                 jsonRestProcedure.setProcedureName(restProcedure.getProcedureName());
                 jsonRestProcedure.setRestMethod(restProcedure.getRestMethod());
                 jsonRestProcedure.setUri(restProcedure.getUri());
+                jsonRestProcedure.setQueryParameterList(restProcedure.getQueryParameterList());
 
                 // If the parameterCount is greater than the number of parameters passed
                 // on the URI, we can expect more parameters via an input stream
                 // so the consumes annotation will need to be set. We will set for XML and JSON methods.
 
                 boolean hasInputStream = false;
-                if (uriParameterCount < parameterCount) {
+                if (uriParameterCount != parameterCount &&
+                	queryParameterList.size() != parameterCount) { 
                     hasInputStream = true;
                     restProcedure.setConsumesAnnotation("@Consumes( MediaType.APPLICATION_XML )"); //$NON-NLS-1$
                     jsonRestProcedure.setConsumesAnnotation("@Consumes( MediaType.APPLICATION_JSON )"); //$NON-NLS-1$
