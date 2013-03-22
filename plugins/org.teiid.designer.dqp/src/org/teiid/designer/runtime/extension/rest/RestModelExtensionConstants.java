@@ -61,6 +61,11 @@ public interface RestModelExtensionConstants {
          * The property definition identifier for the URI.
          */
         String URI = ModelExtensionPropertyDefinition.Utils.getPropertyId(NAMESPACE_PROVIDER, "uri"); //$NON-NLS-1$
+        
+        /**
+         * The property definition identifier for the HEADERS.
+         */
+        String HEADERS = ModelExtensionPropertyDefinition.Utils.getPropertyId(NAMESPACE_PROVIDER, "headers"); //$NON-NLS-1$
     }
 
 }

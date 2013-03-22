@@ -24,6 +24,10 @@
 			<p:description locale="en_US">The relative URI to map this procedure to.</p:description>
 			<p:display locale="en_US">URI</p:display>
 		</p:property>
+		<p:property name="headers" type="string" required="false" index="false">
+			<p:description locale="en_US">Semi-colon delimited list of HTTP Header parameters to pass into the REST service operation. Ex. header1;header2;etc. These value will be passed into the procedure first.</p:description>
+			<p:display locale="en_US">Headers</p:display>
+		</p:property>
 	</p:extendedMetaclass>
 
 </p:modelExtension>

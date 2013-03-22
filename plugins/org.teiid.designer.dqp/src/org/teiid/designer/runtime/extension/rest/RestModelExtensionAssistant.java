@@ -22,6 +22,7 @@ public class RestModelExtensionAssistant extends EmfModelObjectExtensionAssistan
     public void removeRestProperties( EObject modelObject ) throws Exception {
         removeProperty(modelObject, RestModelExtensionConstants.PropertyIds.REST_METHOD);
         removeProperty(modelObject, RestModelExtensionConstants.PropertyIds.URI);
+        removeProperty(modelObject, RestModelExtensionConstants.PropertyIds.HEADERS);
     }
 
 }

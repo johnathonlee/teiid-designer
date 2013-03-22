@@ -46,6 +46,7 @@ import org.teiid.designer.vdb.VdbModelEntry;
 import com.metamatrix.core.modeler.util.FileUtils;
 import com.metamatrix.core.util.CoreStringUtil;
 import com.metamatrix.core.util.I18nUtil;
+import com.metamatrix.core.util.StringUtilities;
 import com.metamatrix.metamodels.relational.Procedure;
 import com.metamatrix.metamodels.relational.impl.ProcedureImpl;
 import com.metamatrix.modeler.core.ModelerCore;
@@ -328,6 +329,28 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
 
         return uri;
     }
+    
+    private static String getHeaders( Procedure procedure ) {
+        Object headers = null;
+
+        try {
+            // try new way first
+            ModelObjectExtensionAssistant assistant = (ModelObjectExtensionAssistant)ExtensionPlugin.getInstance()
+                                                                                                    .getRegistry()
+                                                                                                    .getModelExtensionAssistant(NAMESPACE_PROVIDER.getNamespacePrefix());
+            headers = assistant.getPropertyValue(procedure, RestModelExtensionConstants.PropertyIds.HEADERS);
+
+            if (headers==null || CoreStringUtil.isEmpty((String)headers)) {
+                headers = ANNOTATION_HELPER.getPropertyValueAnyCase(procedure,
+                                                                        ModelObjectAnnotationHelper.EXTENDED_PROPERTY_NAMESPACE
+                                                                                + "headers"); //$NON-NLS-1$
+            }
+        } catch (Exception e) {
+            UTIL.log(e);
+        }
+
+        return headers==null?StringUtilities.EMPTY_STRING:(String)headers;
+    }
 
     /**
      * @param eObject
@@ -340,6 +363,7 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
                                                 List restfulProcedureArray ) {
         String restMethod = getRestMethod(procedure);
         LinkedList<String> queryParameterList = new LinkedList<String>(); 
+        LinkedList<String> headerParameterList = new LinkedList<String>(); 
 
         if (restMethod != null) {
             String uri = getUri(procedure);
@@ -362,8 +386,17 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
                     }
 
                 }
+                
+               //Check for HTTP Header parameters
+                String headers = getHeaders(procedure);
+                if (headers.length()>0){ 
+                	String[] headerParameterArray = headers.split(";"); //$NON-NLS-1$
+                	for (String param : headerParameterArray) {
+	                    headerParameterList.addLast(param);
+	                }
+                }
 
-                //Check for query parameters
+                //Check for uri parameters
                 String uriString = uri;
                 for (int i = 0; i < uriString.length(); i++) {
                     String character = uriString.substring(i, i + 1);
@@ -391,6 +424,7 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
                 restProcedure.setProcedureName(name);
                 restProcedure.setFullyQualifiedProcedureName(fullName);
                 restProcedure.setQueryParameterList(queryParameterList); 
+                restProcedure.setHeaderParameterList(headerParameterList);
 
                 // Create JSON version
                 RestProcedure jsonRestProcedure = new RestProcedure();
@@ -400,14 +434,15 @@ public class GenerateRestWarAction extends Action implements ISelectionListener,
                 jsonRestProcedure.setRestMethod(restProcedure.getRestMethod());
                 jsonRestProcedure.setUri(restProcedure.getUri());
                 jsonRestProcedure.setQueryParameterList(restProcedure.getQueryParameterList());
-
+                jsonRestProcedure.setHeaderParameterList(restProcedure.getHeaderParameterList());
+                
                 // If the parameterCount is greater than the number of parameters passed
                 // on the URI, we can expect more parameters via an input stream
                 // so the consumes annotation will need to be set. We will set for XML and JSON methods.
 
                 boolean hasInputStream = false;
-                if (uriParameterCount != parameterCount &&
-                	queryParameterList.size() != parameterCount) { 
+                if (uriParameterCount + headerParameterList.size() < parameterCount &&
+                	queryParameterList.size() + headerParameterList.size() < parameterCount) { 
                     hasInputStream = true;
                     restProcedure.setConsumesAnnotation("@Consumes( MediaType.APPLICATION_XML )"); //$NON-NLS-1$
                     jsonRestProcedure.setConsumesAnnotation("@Consumes( MediaType.APPLICATION_JSON )"); //$NON-NLS-1$
