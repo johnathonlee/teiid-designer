@@ -1,12 +1,19 @@
 package org.teiid.designer.roles.ui;
 
+import com.metamatrix.metamodels.core.AnnotationContainer;
+import com.metamatrix.metamodels.core.ModelAnnotation;
+import com.metamatrix.metamodels.diagram.DiagramContainer;
+import com.metamatrix.metamodels.transformation.TransformationContainer;
+import com.metamatrix.modeler.core.ModelerCore;
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.teiid.core.util.StringUtil;
 import org.teiid.designer.roles.DataRole;
 import org.teiid.designer.roles.Permission;
@@ -76,14 +83,49 @@ public class DataRoleResolver {
 			return true;
 		}
 	    
-	    URI uri = URI.createURI(path.toString());
-	    
-	    EObject obj = tempContainer.getEObject(uri, false);
-		
-		if( obj == null ) {
-			return false;
+		Resource resource = null;
+		    
+		for( Resource res : tempContainer.getResources() ) {
+			String modelName = res.getURI().lastSegment();
+			if( modelName.equalsIgnoreCase(path.segment(0) + ".xmi")) { //$NON-NLS-1$
+		    		resource = res;
+		    		break;
+		    	}
 		}
+		    
+	    EObject obj = null;
+		    
+	    if( resource != null ) {
+	    	// Build object path in model
+	    	IPath fragmentPath = new Path(""); //$NON-NLS-1$
+	    	int nSegs = path.segmentCount();
+	    	for(int i=1; i< nSegs; i++) {
+	    		fragmentPath = fragmentPath.append(path.segment(i));
+	    	}
+		    	
+	    	obj = getChildOfResource(resource, fragmentPath);
+	    }
+	    		
+	    if( obj == null ) {
+		return false;
+	    }
 		
-		return true;
+	    return true;
+	}
+	
+	private EObject getChildOfResource(Resource resource, IPath childPath) {
+	    for( EObject eObj : resource.getContents()) {
+	        if( eObj instanceof AnnotationContainer || eObj instanceof TransformationContainer ||
+	            eObj instanceof DiagramContainer || eObj instanceof ModelAnnotation ) {
+		    // Do nothing
+		} else {
+		    if(ModelerCore.getModelEditor().getModelRelativePath(eObj).equals(childPath) ) {
+			return eObj;
+		    } else {
+		    	continue;
+		    }
+		}
+	    }
+	    return null;
 	}
 }
